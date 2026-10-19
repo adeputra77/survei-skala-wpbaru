@@ -1,0 +1,578 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Survei Skala — Komunikasi Pajak untuk Wajib Pajak Baru</title>
+<style>
+  :root{
+    --ink:#16202c; --muted:#5a6b7d; --line:#d7dee6; --bg:#f4f6f9; --card:#fff;
+    --accent:#14532d; --accent-soft:#e7f0ea; --warn:#8a4b00; --warn-soft:#fdf3e3;
+    --radius:10px;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);
+       font:15px/1.5 "Segoe UI",system-ui,-apple-system,Arial,sans-serif;}
+  header{position:sticky;top:0;z-index:20;background:var(--accent);color:#fff;
+         padding:10px 16px;display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+  header h1{font-size:16px;margin:0;font-weight:600;flex:1 1 320px}
+  header .meta{font-size:12.5px;opacity:.92}
+  .wrap{max-width:900px;margin:0 auto;padding:16px 16px 120px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);
+        padding:16px 18px;margin:14px 0}
+  .card h2{font-size:15px;margin:0 0 4px;color:var(--accent)}
+  .card .sub{font-size:13px;color:var(--muted);margin:0 0 12px}
+  .item{padding:10px 0;border-top:1px solid #eef2f6}
+  .item:first-of-type{border-top:none}
+  .q{margin:0 0 7px;font-size:14.5px}
+  .q .code{color:var(--muted);font-size:12px;font-weight:600;margin-right:6px}
+  .req{color:#b3261e}
+  .scale{display:flex;flex-wrap:wrap;gap:6px}
+  .scale label{flex:1 1 auto;min-width:64px;text-align:center;border:1px solid var(--line);
+    border-radius:8px;padding:7px 6px;cursor:pointer;background:#fbfcfd;font-size:13px}
+  .scale label:hover{background:var(--accent-soft)}
+  .scale input{position:absolute;opacity:0;width:0;height:0}
+  .scale input:checked + span{font-weight:700}
+  .scale label:has(input:checked){background:var(--accent);color:#fff;border-color:var(--accent)}
+  .endlab{display:flex;justify-content:space-between;font-size:12px;color:var(--muted);margin:4px 2px 0}
+  table.matrix{width:100%;border-collapse:collapse;font-size:13.5px}
+  table.matrix th{font-weight:600;color:var(--muted);font-size:12px;padding:6px 3px;text-align:center;
+    border-bottom:1px solid var(--line);vertical-align:bottom}
+  table.matrix th.rowhead{text-align:left;width:46%}
+  table.matrix td{padding:7px 3px;text-align:center;border-bottom:1px solid #eef2f6}
+  table.matrix td.rowhead{text-align:left;font-size:13.5px}
+  table.matrix tr:hover td{background:#f9fbfc}
+  input[type=radio],input[type=checkbox]{width:19px;height:19px;accent-color:var(--accent)}
+  input[type=text],input[type=number],select{border:1px solid var(--line);border-radius:8px;
+    padding:8px 10px;font:inherit;background:#fff;max-width:100%}
+  .row{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end}
+  .row > div{flex:1 1 180px}
+  .row label.fl{display:block;font-size:12.5px;color:var(--muted);margin-bottom:4px}
+  .multi{display:flex;flex-wrap:wrap;gap:8px}
+  .multi label{border:1px solid var(--line);border-radius:8px;padding:7px 10px;background:#fbfcfd;
+    cursor:pointer;font-size:13.5px;display:flex;gap:7px;align-items:center}
+  .multi label:has(input:checked){background:var(--accent-soft);border-color:var(--accent)}
+  footer.bar{position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px solid var(--line);
+    padding:10px 16px;display:flex;gap:10px;flex-wrap:wrap;align-items:center;z-index:30}
+  button{font:inherit;border-radius:8px;border:1px solid var(--line);background:#fff;
+    padding:9px 14px;cursor:pointer}
+  button.primary{background:var(--accent);color:#fff;border-color:var(--accent);font-weight:600}
+  button:disabled{opacity:.5;cursor:not-allowed}
+  .status{font-size:12.5px;color:var(--muted);flex:1 1 220px}
+  .note{background:var(--warn-soft);border:1px solid #f0dcb8;color:var(--warn);
+    border-radius:var(--radius);padding:10px 12px;font-size:13px;margin:12px 0}
+  .pill{background:#fff2;border:1px solid #ffffff55;border-radius:999px;padding:3px 10px;font-size:12.5px}
+  .hidden{display:none !important}
+  @media (max-width:640px){
+    table.matrix th.rowhead{width:auto}
+    table.matrix, table.matrix tbody, table.matrix tr, table.matrix td{display:block;width:100%}
+    table.matrix thead{display:none}
+    table.matrix tr{border-bottom:1px solid var(--line);padding:6px 0}
+    table.matrix td{border:none;text-align:left;display:inline-block;width:auto;padding:4px 8px}
+    table.matrix td.rowhead{display:block;font-weight:600;padding-bottom:2px}
+    table.matrix td::before{content:attr(data-lab);font-size:11px;color:var(--muted);display:block}
+  }
+  @media print{header,footer.bar{display:none}body{background:#fff}.card{break-inside:avoid}}
+</style>
+</head>
+<body>
+<header>
+  <h1 id="appTitle">Survei Skala — Komunikasi Pajak untuk Wajib Pajak Baru</h1>
+  <span class="pill" id="countPill">Tersimpan: 0</span>
+  <button id="langBtn" type="button">English</button>
+</header>
+
+<div class="wrap">
+  <div class="note" id="introNote"></div>
+  <form id="surveyForm" autocomplete="off"></form>
+</div>
+
+<footer class="bar">
+  <span class="status" id="status"></span>
+  <button type="button" id="pickFileBtn"></button>
+  <button type="button" id="exportBtn"></button>
+  <button type="button" id="clearBtn"></button>
+  <button type="button" id="saveBtn" class="primary"></button>
+</footer>
+
+<script>
+/* ============================================================
+   Survei skala — uji coba komunikasi pajak, wajib pajak baru
+   Satu berkas HTML, tanpa koneksi internet.
+   Jawaban disimpan ke berkas CSV di folder OneDrive yang tersinkronisasi.
+   ============================================================ */
+
+const UI = {
+  title:{id:"Survei Skala — Komunikasi Pajak untuk Wajib Pajak Baru",
+         en:"Scale Survey — Tax Communication for New Taxpayers"},
+  intro:{id:"Survei ini menanyakan jenis pesan, saluran, dan gaya komunikasi mana yang paling memengaruhi kemauan membayar dan melaporkan pajak. Tidak ada jawaban benar atau salah. <b>Jangan menuliskan nama, NPWP, nomor telepon, atau alamat.</b> Isian hanya memakai kode responden.",
+         en:"This survey asks which message types, channels, and styles most affect the willingness to pay and file taxes. There are no right or wrong answers. <b>Do not write names, tax numbers, phone numbers, or addresses.</b> Use the respondent code only."},
+  save:{id:"Simpan jawaban", en:"Save response"},
+  pick:{id:"Pilih berkas OneDrive", en:"Choose OneDrive file"},
+  exp:{id:"Ekspor semua (CSV)", en:"Export all (CSV)"},
+  clear:{id:"Hapus data di perangkat", en:"Clear data on this device"},
+  count:{id:"Tersimpan: ", en:"Saved: "},
+  lang:{id:"English", en:"Bahasa Indonesia"},
+  noFile:{id:"Belum ada berkas penyimpanan. Tekan “Pilih berkas OneDrive” sekali di awal.",
+          en:"No storage file yet. Press “Choose OneDrive file” once at the start."},
+  fileOk:{id:"Berkas penyimpanan: ", en:"Storage file: "},
+  saved:{id:"Jawaban tersimpan. Formulir dikosongkan untuk responden berikutnya.",
+         en:"Response saved. The form is cleared for the next respondent."},
+  savedDl:{id:"Jawaban tersimpan di perangkat dan diunduh sebagai CSV.",
+           en:"Response saved on this device and downloaded as CSV."},
+  needCode:{id:"Isi kode responden terlebih dahulu.", en:"Please fill in the respondent code first."},
+  confirmBlank:{id:"Masih ada %n pertanyaan yang belum dijawab. Simpan saja?",
+                en:"%n questions are still unanswered. Save anyway?"},
+  confirmClear:{id:"Hapus semua jawaban yang tersimpan di perangkat ini? Berkas CSV di OneDrive tidak ikut terhapus.",
+                en:"Delete all responses stored on this device? The CSV file in OneDrive is not deleted."},
+  unsupported:{id:"Peramban ini tidak dapat menulis langsung ke berkas. Setiap jawaban akan diunduh sebagai CSV. Atur folder unduhan ke folder OneDrive Anda.",
+               en:"This browser cannot write to a file directly. Each response is downloaded as CSV instead. Set the download folder to your OneDrive folder."}
+};
+
+/* ---------- Skala ---------- */
+const S = {
+  infl7:{n:7, lo:{id:"Sama sekali tidak menambah",en:"Not at all"}, hi:{id:"Sangat menambah",en:"Very much"}},
+  agree5:{n:5, lo:{id:"Sangat tidak setuju",en:"Strongly disagree"}, hi:{id:"Sangat setuju",en:"Strongly agree"}},
+  like5:{n:5, lo:{id:"Sangat kecil",en:"Very low"}, hi:{id:"Sangat besar",en:"Very high"}},
+  prob11:{n:11, from:0, lo:{id:"0 = tidak mungkin",en:"0 = impossible"}, hi:{id:"10 = pasti",en:"10 = certain"}},
+  intent7:{n:7, lo:{id:"Pasti tidak",en:"Certainly not"}, hi:{id:"Pasti ya",en:"Certainly yes"}}
+};
+
+/* ---------- Daftar pertanyaan ---------- */
+const SECTIONS = [
+{ id:"S0", t:{id:"Bagian 0. Identitas Sesi",en:"Part 0. Session Details"},
+  s:{id:"Diisi oleh pewawancara. Tanpa nama dan tanpa NPWP.",en:"Filled in by the interviewer. No names, no tax numbers."},
+  items:[
+   {id:"SES1",type:"text",req:true,q:{id:"Kode responden (misalnya WP-012 atau MHS-007)",en:"Respondent code (e.g. WP-012 or MHS-007)"}},
+   {id:"SES2",type:"select",req:true,q:{id:"Kelompok responden",en:"Respondent group"},
+     opts:[{v:"wp_baru",id:"Wajib pajak terdaftar ≤ 3 tahun",en:"Taxpayer registered ≤ 3 years"},
+           {v:"wp_lama",id:"Wajib pajak terdaftar > 3 tahun",en:"Taxpayer registered > 3 years"},
+           {v:"mahasiswa",id:"Mahasiswa",en:"College student"},
+           {v:"lainnya",id:"Lainnya",en:"Other"}]},
+   {id:"SES3",type:"text",q:{id:"Lokasi pengambilan data",en:"Data collection site"}},
+   {id:"SES4",type:"text",q:{id:"Kode pewawancara",en:"Interviewer code"}}
+  ]},
+
+{ id:"S1", t:{id:"Bagian 1. Latar Belakang",en:"Part 1. Background"},
+  items:[
+   {id:"BG1",type:"select",q:{id:"Kelompok umur",en:"Age group"},
+     opts:[{v:"<21",id:"Di bawah 21",en:"Under 21"},{v:"21-25",id:"21–25",en:"21–25"},
+           {v:"26-35",id:"26–35",en:"26–35"},{v:"36-45",id:"36–45",en:"36–45"},
+           {v:">45",id:"Di atas 45",en:"Over 45"}]},
+   {id:"BG2",type:"select",q:{id:"Jenis kelamin",en:"Sex"},
+     opts:[{v:"L",id:"Laki-laki",en:"Male"},{v:"P",id:"Perempuan",en:"Female"},
+           {v:"NA",id:"Tidak ingin menjawab",en:"Prefer not to say"}]},
+   {id:"BG3",type:"select",q:{id:"Pendidikan terakhir",en:"Highest education"},
+     opts:[{v:"sma",id:"SMA atau di bawahnya",en:"High school or below"},
+           {v:"d3",id:"Diploma",en:"Diploma"},{v:"s1",id:"Sarjana",en:"Bachelor"},
+           {v:"s2",id:"Pascasarjana",en:"Postgraduate"}]},
+   {id:"BG4",type:"select",q:{id:"Sumber penghasilan utama",en:"Main source of income"},
+     opts:[{v:"usaha",id:"Usaha sendiri",en:"Own business"},
+           {v:"bebas",id:"Pekerjaan bebas atau lepas",en:"Freelance or professional work"},
+           {v:"karyawan",id:"Karyawan",en:"Employee"},
+           {v:"campuran",id:"Campuran",en:"Mixed"},
+           {v:"belum",id:"Belum berpenghasilan",en:"No income yet"}]},
+   {id:"BG5",type:"select",q:{id:"Pengalaman melapor SPT Tahunan",en:"Experience filing an annual return"},
+     opts:[{v:"belum",id:"Belum pernah",en:"Never"},{v:"1x",id:"Satu kali",en:"Once"},
+           {v:"2x+",id:"Lebih dari satu kali",en:"More than once"}]},
+   {id:"BG6",type:"select",q:{id:"Siapa yang biasanya mengurus pajak Anda",en:"Who usually handles your tax matters"},
+     opts:[{v:"sendiri",id:"Saya sendiri",en:"Myself"},{v:"keluarga",id:"Keluarga atau teman",en:"Family or friend"},
+           {v:"konsultan",id:"Konsultan atau petugas",en:"Consultant or an officer"},
+           {v:"belum",id:"Belum ada",en:"Nobody yet"}]}
+  ]},
+
+{ id:"S2", t:{id:"Bagian 2. Jenis Pesan",en:"Part 2. Message Types"},
+  s:{id:"Jika DJP mengirim pesan berikut kepada Anda, seberapa besar pesan itu menambah kemauan Anda untuk melapor dan membayar pajak tepat waktu?",
+     en:"If the tax administration sent you each message below, how much would it increase your willingness to file and pay on time?"},
+  matrix:{scale:"infl7", rows:[
+   {id:"MSG1",id_t:"Pengingat sederhana tentang batas waktu pelaporan",en_t:"A simple reminder of the filing deadline"},
+   {id:"MSG2",id_t:"Penjelasan langkah demi langkah cara menghitung dan melapor",en_t:"A step-by-step explanation of how to compute and file"},
+   {id:"MSG3",id_t:"Peringatan tentang denda dan bunga jika terlambat",en_t:"A warning about fines and interest for being late"},
+   {id:"MSG4",id_t:"Pernyataan bahwa DJP memantau kepatuhan dan memiliki data dari pihak lain",en_t:"A statement that the tax administration monitors compliance and holds data from third parties"},
+   {id:"MSG5",id_t:"Informasi bahwa sebagian besar orang seperti Anda sudah melapor tepat waktu",en_t:"Information that most people like you already file on time"},
+   {id:"MSG6",id_t:"Pernyataan bahwa membayar pajak adalah kewajiban bersama yang benar",en_t:"A statement that paying tax is a shared obligation and the right thing to do"},
+   {id:"MSG7",id_t:"Informasi tentang penggunaan uang pajak, misalnya sekolah, kesehatan, dan jalan",en_t:"Information on what tax money is spent on, such as schools, health, and roads"},
+   {id:"MSG8",id_t:"Informasi penggunaan pajak di daerah tempat Anda tinggal",en_t:"Information on tax spending in your own area"},
+   {id:"MSG9",id_t:"Angka rata-rata rasio pajak terhadap penghasilan di sektor usaha Anda",en_t:"The average ratio of tax to income in your business sector"},
+   {id:"MSG10",id_t:"Tawaran bantuan, misalnya kelas pajak atau pendampingan petugas",en_t:"An offer of help, such as a tax class or assistance from an officer"},
+   {id:"MSG11",id_t:"Hadiah atau undian bagi yang melapor tepat waktu",en_t:"A prize or lottery for those who file on time"},
+   {id:"MSG12",id_t:"Ucapan terima kasih bagi yang sudah patuh",en_t:"A thank-you message for those who have complied"}
+  ]},
+  items:[
+   {id:"MSGBEST",type:"select",q:{id:"Dari dua belas pesan di atas, mana yang paling kuat memengaruhi Anda?",en:"Of the twelve messages above, which affects you most?"},
+     opts:[...Array(12)].map((_,i)=>({v:"MSG"+(i+1),id:"Pesan "+(i+1),en:"Message "+(i+1)}))},
+   {id:"MSGWORST",type:"select",q:{id:"Mana yang paling membuat Anda tidak nyaman atau ingin mengabaikan pesan?",en:"Which one most makes you uncomfortable or want to ignore the message?"},
+     opts:[...Array(12)].map((_,i)=>({v:"MSG"+(i+1),id:"Pesan "+(i+1),en:"Message "+(i+1)}))}
+  ]},
+
+{ id:"S3", t:{id:"Bagian 3. Perkiraan tentang Orang Lain",en:"Part 3. Beliefs about Others"},
+  items:[
+   {id:"NORM1",type:"number",min:0,max:100,unit:{id:"dari 100 orang",en:"out of 100"},
+     q:{id:"Dari 100 orang yang baru memiliki NPWP, menurut perkiraan Anda berapa orang yang melapor SPT tepat waktu?",
+        en:"Out of 100 people who have just registered, how many do you think file their annual return on time?"}},
+   {id:"NORM2",type:"number",min:0,max:100,unit:{id:"dari 100 orang",en:"out of 100"},
+     q:{id:"Dari 100 orang dengan usaha seperti usaha Anda, berapa orang yang melaporkan penghasilannya apa adanya?",
+        en:"Out of 100 people with a business like yours, how many report their income as it really is?"}},
+   {id:"NORM3",type:"radio",scale:"agree5",
+     q:{id:"Jika ternyata jumlah orang yang patuh lebih banyak daripada dugaan saya, saya akan lebih terdorong untuk melapor.",
+        en:"If the number of people who comply turned out to be higher than I thought, I would be more inclined to file."}}
+  ]},
+
+{ id:"S4", t:{id:"Bagian 4. Risiko dan Sanksi",en:"Part 4. Risk and Sanctions"},
+  items:[
+   {id:"RISK1",type:"radio",scale:"prob11",
+     q:{id:"Seberapa besar kemungkinan DJP mengetahui jika seorang wajib pajak baru tidak melapor?",
+        en:"How likely is it that the tax administration finds out when a new taxpayer does not file?"}},
+   {id:"RISK2",type:"radio",scale:"prob11",
+     q:{id:"Seberapa besar kemungkinan seseorang benar-benar dikenai denda jika terlambat melapor?",
+        en:"How likely is it that someone is actually fined for filing late?"}},
+   {id:"RISK3",type:"radio",scale:"agree5",
+     q:{id:"Sanksi yang berlaku saat ini cukup berat untuk membuat orang melapor tepat waktu.",
+        en:"The sanctions in force today are heavy enough to make people file on time."}}
+  ]},
+
+{ id:"S5", t:{id:"Bagian 5. Angka Rata-rata Sektor",en:"Part 5. The Sector Average"},
+  s:{id:"Bayangkan DJP memberi tahu Anda bahwa rata-rata rasio pajak terhadap penghasilan di sektor usaha Anda adalah 2,8 persen.",
+     en:"Imagine the tax administration tells you that the average ratio of tax to income in your business sector is 2.8 per cent."},
+  matrix:{scale:"agree5", rows:[
+   {id:"BM1",id_t:"Angka itu membantu saya memperkirakan berapa pajak yang wajar bagi saya",en_t:"That number helps me judge what a reasonable amount of tax is for me"},
+   {id:"BM2",id_t:"Jika pajak saya di bawah angka itu, saya akan memeriksa ulang perhitungan saya",en_t:"If my tax is below that number, I would check my calculation again"},
+   {id:"BM3",id_t:"Jika pajak saya di atas angka itu, saya merasa sudah cukup membayar",en_t:"If my tax is above that number, I feel I have paid enough"},
+   {id:"BM4",id_t:"Pesan yang menyebut angka itu membuat saya merasa dicurigai",en_t:"A message stating that number makes me feel suspected"},
+   {id:"BM5",id_t:"Angka itu sebaiknya ditampilkan dalam pesan DJP",en_t:"That number should be shown in the tax administration's messages"}
+  ]}},
+
+{ id:"S6", t:{id:"Bagian 6. Saluran Komunikasi",en:"Part 6. Communication Channel"},
+  s:{id:"Seberapa besar kemungkinan Anda membaca dan menindaklanjuti pesan pajak yang datang melalui saluran berikut?",
+     en:"How likely are you to read and act on a tax message that arrives through each channel below?"},
+  matrix:{scale:"like5", rows:[
+   {id:"CH1",id_t:"Email",en_t:"Email"},
+   {id:"CH2",id_t:"WhatsApp",en_t:"WhatsApp"},
+   {id:"CH3",id_t:"SMS",en_t:"SMS"},
+   {id:"CH4",id_t:"Surat pos ke rumah",en_t:"A letter by post"},
+   {id:"CH5",id_t:"Telepon dari petugas",en_t:"A phone call from an officer"},
+   {id:"CH6",id_t:"Notifikasi dalam aplikasi pajak",en_t:"A notification inside the tax application"},
+   {id:"CH7",id_t:"Media sosial resmi DJP",en_t:"The tax administration's social media"},
+   {id:"CH8",id_t:"Kunjungan petugas ke tempat usaha",en_t:"A visit from an officer to the business"}
+  ]},
+  items:[
+   {id:"CHTRUST",type:"select",q:{id:"Saluran mana yang paling Anda percaya sebagai pesan resmi?",en:"Which channel do you trust most as official?"},
+     opts:[{v:"CH1",id:"Email",en:"Email"},{v:"CH2",id:"WhatsApp",en:"WhatsApp"},{v:"CH3",id:"SMS",en:"SMS"},
+           {v:"CH4",id:"Surat pos",en:"Letter"},{v:"CH5",id:"Telepon",en:"Phone call"},
+           {v:"CH6",id:"Aplikasi pajak",en:"Tax application"},{v:"CH7",id:"Media sosial",en:"Social media"},
+           {v:"CH8",id:"Kunjungan petugas",en:"Officer visit"}]},
+   {id:"CHDOUBT",type:"radio",scale:"agree5",
+     q:{id:"Saya khawatir pesan pajak lewat WhatsApp atau email sebenarnya adalah penipuan.",
+        en:"I worry that a tax message by WhatsApp or email is actually a scam."}}
+  ]},
+
+{ id:"S7", t:{id:"Bagian 7. Gaya dan Bentuk Pesan",en:"Part 7. Style and Format"},
+  matrix:{scale:"agree5", rows:[
+   {id:"STY1",id_t:"Saya lebih mudah memahami pesan bergaya santai daripada pesan bergaya formal",en_t:"I find a casual message easier to understand than a formal one"},
+   {id:"STY2",id_t:"Pesan bergaya santai tetap saya percaya sebagai pesan resmi",en_t:"I still believe a casual message is official"},
+   {id:"STY3",id_t:"Pesan dengan gambar atau poster lebih menarik perhatian daripada teks saja",en_t:"A message with a picture or poster catches my attention more than text alone"},
+   {id:"STY4",id_t:"Pesan pajak sebaiknya singkat, paling banyak lima kalimat",en_t:"A tax message should be short, at most five sentences"},
+   {id:"STY5",id_t:"Tautan langsung untuk melapor membuat saya lebih mungkin melapor saat itu juga",en_t:"A direct link to file makes me more likely to file straight away"},
+   {id:"STY6",id_t:"Pesan yang menyebut nama dan keadaan saya sendiri lebih saya perhatikan daripada pesan umum",en_t:"A message about my own situation gets more of my attention than a general one"}
+  ]}},
+
+{ id:"S8", t:{id:"Bagian 8. Frekuensi dan Waktu",en:"Part 8. Frequency and Timing"},
+  items:[
+   {id:"FRQ1",type:"select",q:{id:"Berapa kali sebaiknya DJP mengirim pesan dalam satu tahun?",en:"How often should the tax administration send a message in one year?"},
+     opts:[{v:"1",id:"Satu kali",en:"Once"},{v:"2",id:"Dua kali",en:"Twice"},{v:"3-4",id:"Tiga sampai empat kali",en:"Three or four times"},
+           {v:"5-6",id:"Lima sampai enam kali",en:"Five or six times"},{v:">6",id:"Lebih dari enam kali",en:"More than six times"}]},
+   {id:"FRQ2",type:"select",q:{id:"Kapan pesan paling berguna bagi Anda?",en:"When is a message most useful to you?"},
+     opts:[{v:"jauh",id:"Jauh sebelum batas waktu",en:"Well before the deadline"},
+           {v:"1bulan",id:"Satu bulan sebelum batas waktu",en:"One month before the deadline"},
+           {v:"1minggu",id:"Satu minggu sebelum batas waktu",en:"One week before the deadline"},
+           {v:"setelah",id:"Setelah batas waktu lewat",en:"After the deadline has passed"}]},
+   {id:"FRQ3",type:"radio",scale:"agree5",
+     q:{id:"Menerima pesan pajak setiap bulan selama enam bulan akan membuat saya terganggu.",
+        en:"Receiving a tax message every month for six months would bother me."}}
+  ]},
+
+{ id:"S9", t:{id:"Bagian 9. Kemampuan dan Beban Melapor",en:"Part 9. Ability and Burden"},
+  matrix:{scale:"agree5", rows:[
+   {id:"CST1",id_t:"Saya tahu cara menghitung pajak saya sendiri",en_t:"I know how to compute my own tax"},
+   {id:"CST2",id_t:"Saya yakin dapat melapor sendiri melalui sistem pajak",en_t:"I am confident I can file on my own through the tax system"},
+   {id:"CST3",id_t:"Melapor untuk pertama kali memakan banyak waktu dan tenaga",en_t:"Filing for the first time takes a lot of time and effort"},
+   {id:"CST4",id_t:"Saya membutuhkan bantuan orang lain untuk melapor",en_t:"I need someone else's help in order to file"},
+   {id:"CST5",id_t:"Saya tidak yakin apa saja kewajiban saya setelah memiliki NPWP",en_t:"I am unsure what my obligations are once I have a tax number"}
+  ]}},
+
+{ id:"S10", t:{id:"Bagian 10. Kepercayaan dan Manfaat Pajak",en:"Part 10. Trust and the Use of Taxes"},
+  matrix:{scale:"agree5", rows:[
+   {id:"TRS1",id_t:"Saya percaya DJP menjalankan tugasnya dengan baik",en_t:"I trust that the tax administration does its job well"},
+   {id:"TRS2",id_t:"Sistem pajak di Indonesia adil bagi orang seperti saya",en_t:"The tax system in Indonesia is fair to people like me"},
+   {id:"TRS3",id_t:"Manfaat pajak kembali kepada masyarakat",en_t:"The benefits of taxation come back to the public"},
+   {id:"TRS4",id_t:"Jika saya tahu untuk apa pajak saya digunakan, saya lebih bersedia membayar",en_t:"If I knew what my taxes are used for, I would be more willing to pay"},
+   {id:"TRS5",id_t:"Orang di sekitar saya menganggap membayar pajak adalah hal yang penting",en_t:"People around me consider paying tax important"}
+  ]},
+  items:[
+   {id:"SPEND",type:"multi",q:{id:"Penggunaan pajak di bidang mana yang paling ingin Anda ketahui? (boleh lebih dari satu)",
+                               en:"Which areas of tax spending would you most like to know about? (more than one allowed)"},
+     opts:[{v:"pendidikan",id:"Pendidikan",en:"Education"},{v:"kesehatan",id:"Kesehatan",en:"Health"},
+           {v:"infrastruktur",id:"Jalan dan infrastruktur",en:"Roads and infrastructure"},
+           {v:"bansos",id:"Bantuan sosial",en:"Social assistance"},
+           {v:"keamanan",id:"Keamanan dan pertahanan",en:"Security and defence"},
+           {v:"daerah",id:"Pembangunan di daerah saya",en:"Development in my own area"},
+           {v:"umkm",id:"Dukungan untuk usaha kecil",en:"Support for small businesses"}]}
+  ]},
+
+{ id:"S11", t:{id:"Bagian 11. Niat",en:"Part 11. Intention"},
+  items:[
+   {id:"INT1",type:"radio",scale:"intent7",
+     q:{id:"Seberapa besar kemungkinan Anda melapor SPT Tahunan berikutnya tepat waktu?",
+        en:"How likely are you to file your next annual return on time?"}},
+   {id:"INT2",type:"radio",scale:"intent7",
+     q:{id:"Seberapa besar kemungkinan Anda melaporkan penghasilan apa adanya?",
+        en:"How likely are you to report your income as it really is?"}},
+   {id:"INT3",type:"radio",scale:"agree5",
+     q:{id:"Saya akan tetap melapor meskipun tidak menerima pesan apa pun dari DJP.",
+        en:"I would still file even if I received no message at all."}}
+  ]}
+];
+
+/* ---------- Status bahasa ---------- */
+let LANG = localStorage.getItem("survey_lang") || "id";
+const L = (o)=> (o && (o[LANG] ?? o.id)) || "";
+
+/* ---------- Render ---------- */
+const form = document.getElementById("surveyForm");
+
+function scaleRadios(itemId, sc){
+  const from = sc.from ?? 1;
+  let h = `<div class="scale">`;
+  for(let i=0;i<sc.n;i++){
+    const v = from + i;
+    h += `<label><input type="radio" name="${itemId}" value="${v}"><span>${v}</span></label>`;
+  }
+  h += `</div><div class="endlab"><span>${L(sc.lo)}</span><span>${L(sc.hi)}</span></div>`;
+  return h;
+}
+
+function renderItem(it){
+  const req = it.req ? ` <span class="req">*</span>` : "";
+  let body = "";
+  if(it.type==="radio"){
+    body = scaleRadios(it.id, S[it.scale]);
+  } else if(it.type==="select"){
+    body = `<select name="${it.id}"><option value="">—</option>` +
+      it.opts.map(o=>`<option value="${o.v}">${LANG==="id"?o.id:o.en}</option>`).join("") + `</select>`;
+  } else if(it.type==="text"){
+    body = `<input type="text" name="${it.id}" maxlength="40">`;
+  } else if(it.type==="number"){
+    body = `<input type="number" name="${it.id}" min="${it.min??0}" max="${it.max??100}" style="width:110px">` +
+           (it.unit?` <span style="color:var(--muted);font-size:13px">${L(it.unit)}</span>`:"");
+  } else if(it.type==="multi"){
+    body = `<div class="multi">` + it.opts.map(o=>
+      `<label><input type="checkbox" name="${it.id}" value="${o.v}">${LANG==="id"?o.id:o.en}</label>`).join("") + `</div>`;
+  }
+  return `<div class="item"><p class="q"><span class="code">${it.id}</span>${L(it.q)}${req}</p>${body}</div>`;
+}
+
+function renderMatrix(sectionId, mx){
+  const sc = S[mx.scale], from = sc.from ?? 1;
+  let head = `<th class="rowhead"></th>`;
+  for(let i=0;i<sc.n;i++) head += `<th>${from+i}</th>`;
+  let rows = "";
+  for(const r of mx.rows){
+    let tds = `<td class="rowhead"><span class="code">${r.id}</span> ${LANG==="id"?r.id_t:r.en_t}</td>`;
+    for(let i=0;i<sc.n;i++){
+      const v = from+i;
+      tds += `<td data-lab="${v}"><input type="radio" name="${r.id}" value="${v}"></td>`;
+    }
+    rows += `<tr>${tds}</tr>`;
+  }
+  return `<div class="endlab"><span>1 = ${L(sc.lo)}</span><span>${from+sc.n-1} = ${L(sc.hi)}</span></div>
+   <div style="overflow-x:auto"><table class="matrix"><thead><tr>${head}</tr></thead><tbody>${rows}</tbody></table></div>`;
+}
+
+function render(){
+  document.documentElement.lang = LANG;
+  document.title = L(UI.title);
+  document.getElementById("appTitle").textContent = L(UI.title);
+  document.getElementById("introNote").innerHTML = L(UI.intro);
+  document.getElementById("saveBtn").textContent = L(UI.save);
+  document.getElementById("pickFileBtn").textContent = L(UI.pick);
+  document.getElementById("exportBtn").textContent = L(UI.exp);
+  document.getElementById("clearBtn").textContent = L(UI.clear);
+  document.getElementById("langBtn").textContent = L(UI.lang);
+  form.innerHTML = SECTIONS.map(sec=>{
+    let h = `<section class="card"><h2>${L(sec.t)}</h2>`;
+    if(sec.s) h += `<p class="sub">${L(sec.s)}</p>`;
+    if(sec.matrix) h += renderMatrix(sec.id, sec.matrix);
+    if(sec.items) h += sec.items.map(renderItem).join("");
+    return h + `</section>`;
+  }).join("");
+  updateCount();
+}
+
+/* ---------- Daftar kolom ---------- */
+function columns(){
+  const cols = ["timestamp","lang","durasi_detik"];
+  for(const sec of SECTIONS){
+    if(sec.matrix) for(const r of sec.matrix.rows) cols.push(r.id);
+    if(sec.items) for(const it of sec.items) cols.push(it.id);
+  }
+  return cols;
+}
+
+/* ---------- Pengumpulan jawaban ---------- */
+let startedAt = Date.now();
+
+function collect(){
+  const fd = new FormData(form), out = {};
+  for(const c of columns()) out[c] = "";
+  for(const sec of SECTIONS){
+    if(sec.items) for(const it of sec.items){
+      if(it.type==="multi"){ out[it.id] = fd.getAll(it.id).join("|"); }
+    }
+  }
+  for(const [k,v] of fd.entries()){
+    if(out[k] !== undefined && out[k] === "") out[k] = v;
+  }
+  out.timestamp = new Date().toISOString();
+  out.lang = LANG;
+  out.durasi_detik = Math.round((Date.now()-startedAt)/1000);
+  return out;
+}
+
+function blankCount(obj){
+  let n = 0;
+  for(const c of columns()){
+    if(["timestamp","lang","durasi_detik","SES3","SES4"].includes(c)) continue;
+    if(!obj[c]) n++;
+  }
+  return n;
+}
+
+/* ---------- Penyimpanan ---------- */
+const LSKEY = "survey_responses_v1";
+const getAll = ()=> JSON.parse(localStorage.getItem(LSKEY) || "[]");
+const setAll = (a)=> localStorage.setItem(LSKEY, JSON.stringify(a));
+
+function csv(rows){
+  const cols = columns();
+  const esc = (s)=>{ s = (s??"").toString(); return /[",\n;]/.test(s) ? '"'+s.replace(/"/g,'""')+'"' : s; };
+  return "﻿" + [cols.join(",")].concat(rows.map(r=>cols.map(c=>esc(r[c])).join(","))).join("\r\n") + "\r\n";
+}
+
+/* Berkas tujuan disimpan di IndexedDB agar tetap dikenali setelah peramban ditutup. */
+let fileHandle = null;
+const idb = {
+  db:null,
+  open(){ return new Promise(res=>{ const q = indexedDB.open("surveyStore",1);
+    q.onupgradeneeded = ()=> q.result.createObjectStore("kv");
+    q.onsuccess = ()=>{ idb.db = q.result; res(idb.db); }; q.onerror = ()=> res(null); }); },
+  async get(k){ const db = idb.db || await idb.open(); if(!db) return null;
+    return new Promise(res=>{ const t = db.transaction("kv").objectStore("kv").get(k);
+      t.onsuccess = ()=> res(t.result || null); t.onerror = ()=> res(null); }); },
+  async set(k,v){ const db = idb.db || await idb.open(); if(!db) return;
+    return new Promise(res=>{ const t = db.transaction("kv","readwrite").objectStore("kv").put(v,k);
+      t.onsuccess = ()=> res(); t.onerror = ()=> res(); }); }
+};
+
+const supportsFS = typeof window.showSaveFilePicker === "function";
+
+async function pickFile(){
+  if(!supportsFS){ alert(L(UI.unsupported)); return; }
+  try{
+    fileHandle = await window.showSaveFilePicker({
+      suggestedName: "respon_survei_skala.csv",
+      types:[{description:"CSV", accept:{"text/csv":[".csv"]}}]
+    });
+    await idb.set("fileHandle", fileHandle);
+    await writeAll();
+    setStatus();
+  }catch(e){ /* dibatalkan pengguna */ }
+}
+
+async function ensurePermission(h){
+  if(!h) return false;
+  const opts = {mode:"readwrite"};
+  if(await h.queryPermission(opts) === "granted") return true;
+  return await h.requestPermission(opts) === "granted";
+}
+
+async function writeAll(){
+  if(!fileHandle) return false;
+  if(!await ensurePermission(fileHandle)) return false;
+  const w = await fileHandle.createWritable();
+  await w.write(csv(getAll()));
+  await w.close();
+  return true;
+}
+
+function download(name, text){
+  const b = new Blob([text], {type:"text/csv;charset=utf-8"});
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(b); a.download = name; a.click();
+  setTimeout(()=>URL.revokeObjectURL(a.href), 2000);
+}
+
+function setStatus(msg){
+  const el = document.getElementById("status");
+  if(msg){ el.textContent = msg; return; }
+  if(!supportsFS){ el.textContent = L(UI.unsupported); document.getElementById("pickFileBtn").disabled = true; return; }
+  el.textContent = fileHandle ? L(UI.fileOk) + fileHandle.name : L(UI.noFile);
+}
+
+function updateCount(){
+  document.getElementById("countPill").textContent = L(UI.count) + getAll().length;
+}
+
+/* ---------- Tombol ---------- */
+document.getElementById("saveBtn").addEventListener("click", async ()=>{
+  const data = collect();
+  if(!data.SES1){ alert(L(UI.needCode)); return; }
+  const miss = blankCount(data);
+  if(miss > 0 && !confirm(L(UI.confirmBlank).replace("%n", miss))) return;
+  const all = getAll(); all.push(data); setAll(all);
+  let ok = false;
+  try{ ok = await writeAll(); }catch(e){ ok = false; }
+  if(!ok) download("respon_" + data.SES1.replace(/[^A-Za-z0-9_-]/g,"") + ".csv", csv([data]));
+  form.reset(); startedAt = Date.now(); updateCount(); setStatus();
+  window.scrollTo({top:0,behavior:"smooth"});
+  alert(ok ? L(UI.saved) : L(UI.savedDl));
+});
+
+document.getElementById("pickFileBtn").addEventListener("click", pickFile);
+
+document.getElementById("exportBtn").addEventListener("click", ()=>{
+  const all = getAll();
+  if(!all.length){ alert("0"); return; }
+  download("respon_survei_skala_" + new Date().toISOString().slice(0,10) + ".csv", csv(all));
+});
+
+document.getElementById("clearBtn").addEventListener("click", ()=>{
+  if(!confirm(L(UI.confirmClear))) return;
+  localStorage.removeItem(LSKEY); updateCount();
+});
+
+document.getElementById("langBtn").addEventListener("click", ()=>{
+  const data = collect();
+  LANG = LANG === "id" ? "en" : "id";
+  localStorage.setItem("survey_lang", LANG);
+  render();
+  for(const [k,v] of Object.entries(data)){
+    if(!v || ["timestamp","lang","durasi_detik"].includes(k)) continue;
+    const els = form.querySelectorAll(`[name="${k}"]`);
+    els.forEach(el=>{
+      if(el.type==="radio"||el.type==="checkbox"){ if(v.split("|").includes(el.value)) el.checked = true; }
+      else el.value = v;
+    });
+  }
+  setStatus();
+});
+
+/* ---------- Mulai ---------- */
+(async function init(){
+  render();
+  const h = await idb.get("fileHandle");
+  if(h){ fileHandle = h; }
+  setStatus();
+})();
+</script>
+</body>
+</html>
