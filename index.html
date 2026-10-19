@@ -90,6 +90,7 @@
 <footer class="bar">
   <span class="status" id="status"></span>
   <button type="button" id="pickFileBtn"></button>
+  <button type="button" id="sendBtn" hidden></button>
   <button type="button" id="exportBtn"></button>
   <button type="button" id="clearBtn"></button>
   <button type="button" id="saveBtn" class="primary"></button>
@@ -112,6 +113,15 @@ const UI = {
   exp:{id:"Ekspor semua (CSV)", en:"Export all (CSV)"},
   clear:{id:"Hapus data di perangkat", en:"Clear data on this device"},
   count:{id:"Tersimpan: ", en:"Saved: "},
+  queued:{id:"belum terkirim: ", en:"not sent: "},
+  send:{id:"Kirim ulang", en:"Retry sending"},
+  sentOk:{id:"Semua jawaban sudah terkirim ke Google Sheet.",
+          en:"Every response has been sent to the Google Sheet."},
+  sentQueued:{id:"%n jawaban belum terkirim; akan dicoba lagi saat ada koneksi.",
+              en:"%n responses are not sent yet; they will be retried when there is a connection."},
+  sendNone:{id:"Tidak ada jawaban yang menunggu kirim.", en:"Nothing is waiting to be sent."},
+  sendFail:{id:"Pengiriman gagal. Jawaban tetap tersimpan di perangkat ini dan dapat dicoba lagi.",
+            en:"Sending failed. The responses are still on this device and can be retried."},
   lang:{id:"English", en:"Bahasa Indonesia"},
   noFile:{id:"Belum ada berkas penyimpanan. Tekan “Pilih berkas OneDrive” sekali di awal.",
           en:"No storage file yet. Press “Choose OneDrive file” once at the start."},
@@ -396,6 +406,7 @@ function render(){
   document.getElementById("saveBtn").textContent = L(UI.save);
   document.getElementById("pickFileBtn").textContent = L(UI.pick);
   document.getElementById("exportBtn").textContent = L(UI.exp);
+  document.getElementById("sendBtn").textContent = L(UI.send);
   document.getElementById("clearBtn").textContent = L(UI.clear);
   document.getElementById("langBtn").textContent = L(UI.lang);
   form.innerHTML = SECTIONS.map(sec=>{
@@ -410,7 +421,7 @@ function render(){
 
 /* ---------- Daftar kolom ---------- */
 function columns(){
-  const cols = ["timestamp","lang","durasi_detik"];
+  const cols = ["resp_id","timestamp","lang","durasi_detik"];
   for(const sec of SECTIONS){
     if(sec.matrix) for(const r of sec.matrix.rows) cols.push(r.id);
     if(sec.items) for(const it of sec.items) cols.push(it.id);
@@ -432,6 +443,8 @@ function collect(){
   for(const [k,v] of fd.entries()){
     if(out[k] !== undefined && out[k] === "") out[k] = v;
   }
+  out.resp_id = (crypto.randomUUID ? crypto.randomUUID()
+                 : "r-" + Date.now() + "-" + Math.random().toString(36).slice(2, 10));
   out.timestamp = new Date().toISOString();
   out.lang = LANG;
   out.durasi_detik = Math.round((Date.now()-startedAt)/1000);
@@ -441,11 +454,64 @@ function collect(){
 function blankCount(obj){
   let n = 0;
   for(const c of columns()){
-    if(["timestamp","lang","durasi_detik","SES3","SES4"].includes(c)) continue;
+    if(["resp_id","timestamp","lang","durasi_detik","SES3","SES4"].includes(c)) continue;
     if(!obj[c]) n++;
   }
   return n;
 }
+
+/* ---------- Pengiriman ke Google Sheet (opsional) ----------
+   Alamat web app dan kuncinya TIDAK ditanam di halaman ini, karena halaman ini
+   publik. Pewawancara membuka tautan yang memuat keduanya satu kali:
+
+     https://.../survei-skala-wpbaru/?e=<URL web app>&k=<kunci>
+
+   Setelah itu keduanya disimpan di peramban perangkat tersebut dan dibersihkan
+   dari address bar. Tanpa keduanya, halaman tetap berjalan sepenuhnya luring:
+   jawaban hanya masuk ke berkas CSV seperti sebelumnya.                        */
+const CFGKEY = "survey_endpoint_v1";
+
+function loadCfg(){
+  const q = new URLSearchParams(location.search);
+  if(q.get("e")){
+    const cfg = { endpoint: q.get("e"), key: q.get("k") || "" };
+    try{ localStorage.setItem(CFGKEY, JSON.stringify(cfg)); }catch(e){}
+    history.replaceState({}, "", location.pathname);   // jangan tinggalkan kunci di address bar
+    return cfg;
+  }
+  try{ return JSON.parse(localStorage.getItem(CFGKEY) || "null"); }catch(e){ return null; }
+}
+let CFG = loadCfg();
+
+async function sendOne(rec){
+  if(!CFG || !CFG.endpoint) return false;
+  try{
+    // text/plain menghindari preflight CORS, yang tidak dilayani Apps Script
+    const res = await fetch(CFG.endpoint, {
+      method: "POST",
+      headers: { "Content-Type": "text/plain;charset=utf-8" },
+      body: JSON.stringify({ key: CFG.key, columns: columns(), row: rec })
+    });
+    if(!res.ok) return false;
+    const out = await res.json().catch(()=>({ ok:true }));
+    return out.ok !== false;
+  }catch(e){ return false; }
+}
+
+/* Antrean: jawaban yang belum sampai tetap tersimpan dan dicoba lagi nanti. */
+async function flushQueue(){
+  if(!CFG || !CFG.endpoint) return 0;
+  const all = getAll();
+  let sent = 0;
+  for(const r of all){
+    if(r._sent) continue;
+    if(await sendOne(r)){ r._sent = true; sent++; } else break;   // berhenti saat gagal
+  }
+  setAll(all); updateCount();
+  return sent;
+}
+
+const pending = ()=> getAll().filter(r => !r._sent).length;
 
 /* ---------- Penyimpanan ---------- */
 const LSKEY = "survey_responses_v1";
@@ -519,7 +585,14 @@ function setStatus(msg){
 }
 
 function updateCount(){
-  document.getElementById("countPill").textContent = L(UI.count) + getAll().length;
+  const n = getAll().length, q = pending();
+  const sendBtn = document.getElementById("sendBtn");
+  document.getElementById("countPill").textContent =
+    L(UI.count) + n + (CFG && CFG.endpoint ? " · " + L(UI.queued) + q : "");
+  if(sendBtn){
+    sendBtn.hidden = !(CFG && CFG.endpoint);
+    sendBtn.disabled = q === 0;
+  }
 }
 
 /* ---------- Tombol ---------- */
@@ -532,12 +605,26 @@ document.getElementById("saveBtn").addEventListener("click", async ()=>{
   let ok = false;
   try{ ok = await writeAll(); }catch(e){ ok = false; }
   if(!ok) download("respon_" + data.SES1.replace(/[^A-Za-z0-9_-]/g,"") + ".csv", csv([data]));
+  let sentMsg = "";
+  if(CFG && CFG.endpoint){
+    await flushQueue();
+    const q = pending();
+    sentMsg = "\n" + (q === 0 ? L(UI.sentOk) : L(UI.sentQueued).replace("%n", q));
+  }
   form.reset(); startedAt = Date.now(); updateCount(); setStatus();
   window.scrollTo({top:0,behavior:"smooth"});
-  alert(ok ? L(UI.saved) : L(UI.savedDl));
+  alert((ok ? L(UI.saved) : L(UI.savedDl)) + sentMsg);
 });
 
 document.getElementById("pickFileBtn").addEventListener("click", pickFile);
+
+document.getElementById("sendBtn").addEventListener("click", async ()=>{
+  if(pending() === 0){ alert(L(UI.sendNone)); return; }
+  const sent = await flushQueue();
+  alert(sent > 0 ? L(UI.sentQueued).replace("%n", pending()).replace(/^0 /, "")
+                 : L(UI.sendFail));
+  updateCount();
+});
 
 document.getElementById("exportBtn").addEventListener("click", ()=>{
   const all = getAll();
@@ -569,6 +656,7 @@ document.getElementById("langBtn").addEventListener("click", ()=>{
 /* ---------- Mulai ---------- */
 (async function init(){
   render();
+  if(CFG && CFG.endpoint) flushQueue();      // kirim sisa antrean begitu halaman dibuka
   const h = await idb.get("fileHandle");
   if(h){ fileHandle = h; }
   setStatus();
