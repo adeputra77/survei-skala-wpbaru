@@ -604,13 +604,21 @@ document.getElementById("saveBtn").addEventListener("click", async ()=>{
   const all = getAll(); all.push(data); setAll(all);
   let ok = false;
   try{ ok = await writeAll(); }catch(e){ ok = false; }
-  if(!ok) download("respon_" + data.SES1.replace(/[^A-Za-z0-9_-]/g,"") + ".csv", csv([data]));
+
+  // Kirim lebih dahulu, baru putuskan perlu unduh atau tidak. Di HP tidak ada
+  // penulisan berkas, jadi tanpa urutan ini setiap jawaban akan memicu satu
+  // unduhan CSV, padahal jawabannya sudah masuk ke Google Sheet.
   let sentMsg = "";
+  let sentNow = false;
   if(CFG && CFG.endpoint){
     await flushQueue();
     const q = pending();
-    sentMsg = "\n" + (q === 0 ? L(UI.sentOk) : L(UI.sentQueued).replace("%n", q));
+    sentNow = q === 0;
+    sentMsg = "\n" + (sentNow ? L(UI.sentOk) : L(UI.sentQueued).replace("%n", q));
   }
+  // unduhan per jawaban hanya sebagai jaring pengaman: tidak ada berkas tujuan
+  // DAN jawaban belum sampai ke Sheet
+  if(!ok && !sentNow) download("respon_" + data.SES1.replace(/[^A-Za-z0-9_-]/g,"") + ".csv", csv([data]));
   form.reset(); startedAt = Date.now(); updateCount(); setStatus();
   window.scrollTo({top:0,behavior:"smooth"});
   alert((ok ? L(UI.saved) : L(UI.savedDl)) + sentMsg);
