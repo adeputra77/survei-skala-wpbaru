@@ -165,6 +165,11 @@ const SECTIONS = [
 
 { id:"S1", t:{id:"Bagian 1. Latar Belakang",en:"Part 1. Background"},
   items:[
+   {id:"BG0",type:"select",req:true,q:{id:"Generasi",en:"Generation"},
+     opts:[{v:"genz",id:"Gen Z (lahir 1997–2012)",en:"Gen Z (born 1997–2012)"},
+           {v:"milenial",id:"Milenial (lahir 1981–1996)",en:"Millennial (born 1981–1996)"},
+           {v:"genx",id:"Gen X (lahir 1965–1980)",en:"Gen X (born 1965–1980)"},
+           {v:"boomer",id:"Baby Boomer (lahir 1946–1964)",en:"Baby Boomer (born 1946–1964)"}]},
    {id:"BG1",type:"select",q:{id:"Kelompok umur",en:"Age group"},
      opts:[{v:"<21",id:"Di bawah 21",en:"Under 21"},{v:"21-25",id:"21–25",en:"21–25"},
            {v:"26-35",id:"26–35",en:"26–35"},{v:"36-45",id:"36–45",en:"36–45"},
@@ -188,10 +193,38 @@ const SECTIONS = [
    {id:"BG6",type:"select",q:{id:"Siapa yang biasanya mengurus pajak Anda",en:"Who usually handles your tax matters"},
      opts:[{v:"sendiri",id:"Saya sendiri",en:"Myself"},{v:"keluarga",id:"Keluarga atau teman",en:"Family or friend"},
            {v:"konsultan",id:"Konsultan atau petugas",en:"Consultant or an officer"},
-           {v:"belum",id:"Belum ada",en:"Nobody yet"}]}
+           {v:"belum",id:"Belum ada",en:"Nobody yet"}]},
+   {id:"BG7",type:"multi",q:{id:"Pajak apa saja yang pernah Anda bayar atau urus sendiri, selain PPh? (boleh lebih dari satu)",
+                             en:"Which taxes have you paid or handled yourself, apart from income tax? (more than one allowed)"},
+     opts:[{v:"pkb",id:"Pajak kendaraan bermotor (motor atau mobil)",en:"Motor vehicle tax"},
+           {v:"pbb",id:"PBB rumah atau tanah",en:"Land and building tax"},
+           {v:"daerah",id:"Pajak daerah lain (hotel, restoran, hiburan, reklame)",en:"Other local taxes"},
+           {v:"retribusi",id:"Retribusi daerah",en:"Local user charges"},
+           {v:"beacukai",id:"Bea masuk atau cukai",en:"Customs or excise"},
+           {v:"belum",id:"Belum pernah selain PPh",en:"None apart from income tax"}]},
+   {id:"BG8",type:"select",q:{id:"Jika pernah membayar pajak kendaraan atau pajak daerah, apa alasan utamanya?",
+                              en:"If you have paid vehicle or local tax, what was the main reason?"},
+     opts:[{v:"sanksi",id:"Takut denda atau tilang",en:"Fear of a fine or being stopped"},
+           {v:"syarat",id:"Syarat perpanjangan STNK atau layanan lain",en:"Required to renew the vehicle papers or another service"},
+           {v:"jual",id:"Menjaga nilai jual kendaraan",en:"Protecting the resale value"},
+           {v:"mudah",id:"Prosesnya mudah dan cepat",en:"The process is quick and easy"},
+           {v:"kewajiban",id:"Merasa memang kewajiban",en:"It simply felt like an obligation"},
+           {v:"manfaat",id:"Manfaatnya terlihat, misalnya jalan",en:"The benefit is visible, roads for instance"},
+           {v:"belum",id:"Belum pernah",en:"Never have"}]}
   ]},
 
-{ id:"S2", t:{id:"Bagian 2. Jenis Pesan",en:"Part 2. Message Types"},
+{ id:"S1B", t:{id:"Bagian 2. Pengalaman Pajak Lain",en:"Part 2. Experience with Other Taxes"},
+  s:{id:"Banyak orang sudah membayar pajak lain sebelum berurusan dengan pajak penghasilan.",
+     en:"Many people have paid other taxes long before they deal with income tax."},
+  matrix:{scale:"agree5", rows:[
+   {id:"REF1",id_t:"Membayar pajak kendaraan terasa lebih mudah daripada melaporkan SPT Tahunan",en_t:"Paying vehicle tax feels easier than filing an annual return"},
+   {id:"REF2",id_t:"Saya menilai wajar tidaknya pajak penghasilan dengan membandingkannya dengan pajak lain yang saya bayar",en_t:"I judge whether income tax is reasonable by comparing it with the other taxes I pay"},
+   {id:"REF3",id_t:"Pada pajak kendaraan, saya tahu persis apa akibatnya kalau tidak membayar; pada pajak penghasilan saya tidak",en_t:"With vehicle tax I know exactly what happens if I do not pay; with income tax I do not"},
+   {id:"REF4",id_t:"Kalau mengurus pajak kendaraan saja saya bisa, mengurus SPT seharusnya juga bisa",en_t:"If I can handle vehicle tax, I should be able to handle an annual return"},
+   {id:"REF5",id_t:"Manfaat pajak daerah lebih terlihat daripada manfaat pajak penghasilan",en_t:"The benefit of local taxes is more visible than the benefit of income tax"}
+  ]}},
+
+{ id:"S2", t:{id:"Bagian 3. Jenis Pesan",en:"Part 3. Message Types"},
   s:{id:"Jika DJP mengirim pesan berikut kepada Anda, seberapa besar pesan itu menambah kemauan Anda untuk melapor dan membayar pajak tepat waktu?",
      en:"If the tax administration sent you each message below, how much would it increase your willingness to file and pay on time?"},
   matrix:{scale:"infl7", rows:[
@@ -215,7 +248,7 @@ const SECTIONS = [
      opts:[...Array(12)].map((_,i)=>({v:"MSG"+(i+1),id:"Pesan "+(i+1),en:"Message "+(i+1)}))}
   ]},
 
-{ id:"S3", t:{id:"Bagian 3. Perkiraan tentang Orang Lain",en:"Part 3. Beliefs about Others"},
+{ id:"S3", t:{id:"Bagian 4. Perkiraan tentang Orang Lain",en:"Part 4. Beliefs about Others"},
   items:[
    {id:"NORM1",type:"number",min:0,max:100,unit:{id:"dari 100 orang",en:"out of 100"},
      q:{id:"Dari 100 orang yang baru memiliki NPWP, menurut perkiraan Anda berapa orang yang melapor SPT tepat waktu?",
@@ -228,7 +261,7 @@ const SECTIONS = [
         en:"If the number of people who comply turned out to be higher than I thought, I would be more inclined to file."}}
   ]},
 
-{ id:"S4", t:{id:"Bagian 4. Risiko dan Sanksi",en:"Part 4. Risk and Sanctions"},
+{ id:"S4", t:{id:"Bagian 5. Risiko dan Sanksi",en:"Part 5. Risk and Sanctions"},
   items:[
    {id:"RISK1",type:"radio",scale:"prob11",
      q:{id:"Seberapa besar kemungkinan DJP mengetahui jika seorang wajib pajak baru tidak melapor?",
@@ -241,7 +274,7 @@ const SECTIONS = [
         en:"The sanctions in force today are heavy enough to make people file on time."}}
   ]},
 
-{ id:"S5", t:{id:"Bagian 5. Angka Rata-rata Sektor",en:"Part 5. The Sector Average"},
+{ id:"S5", t:{id:"Bagian 6. Angka Rata-rata Sektor",en:"Part 6. The Sector Average"},
   s:{id:"Bayangkan DJP memberi tahu Anda bahwa rata-rata rasio pajak terhadap penghasilan di sektor usaha Anda adalah 2,8 persen.",
      en:"Imagine the tax administration tells you that the average ratio of tax to income in your business sector is 2.8 per cent."},
   matrix:{scale:"agree5", rows:[
@@ -252,7 +285,7 @@ const SECTIONS = [
    {id:"BM5",id_t:"Angka itu sebaiknya ditampilkan dalam pesan DJP",en_t:"That number should be shown in the tax administration's messages"}
   ]}},
 
-{ id:"S6", t:{id:"Bagian 6. Saluran Komunikasi",en:"Part 6. Communication Channel"},
+{ id:"S6", t:{id:"Bagian 7. Saluran Komunikasi",en:"Part 7. Communication Channel"},
   s:{id:"Seberapa besar kemungkinan Anda membaca dan menindaklanjuti pesan pajak yang datang melalui saluran berikut?",
      en:"How likely are you to read and act on a tax message that arrives through each channel below?"},
   matrix:{scale:"like5", rows:[
@@ -276,7 +309,7 @@ const SECTIONS = [
         en:"I worry that a tax message by WhatsApp or email is actually a scam."}}
   ]},
 
-{ id:"S7", t:{id:"Bagian 7. Gaya dan Bentuk Pesan",en:"Part 7. Style and Format"},
+{ id:"S7", t:{id:"Bagian 8. Gaya dan Bentuk Pesan",en:"Part 8. Style and Format"},
   matrix:{scale:"agree5", rows:[
    {id:"STY1",id_t:"Saya lebih mudah memahami pesan bergaya santai daripada pesan bergaya formal",en_t:"I find a casual message easier to understand than a formal one"},
    {id:"STY2",id_t:"Pesan bergaya santai tetap saya percaya sebagai pesan resmi",en_t:"I still believe a casual message is official"},
@@ -286,7 +319,7 @@ const SECTIONS = [
    {id:"STY6",id_t:"Pesan yang menyebut nama dan keadaan saya sendiri lebih saya perhatikan daripada pesan umum",en_t:"A message about my own situation gets more of my attention than a general one"}
   ]}},
 
-{ id:"S8", t:{id:"Bagian 8. Frekuensi dan Waktu",en:"Part 8. Frequency and Timing"},
+{ id:"S8", t:{id:"Bagian 9. Frekuensi dan Waktu",en:"Part 9. Frequency and Timing"},
   items:[
    {id:"FRQ1",type:"select",q:{id:"Berapa kali sebaiknya DJP mengirim pesan dalam satu tahun?",en:"How often should the tax administration send a message in one year?"},
      opts:[{v:"1",id:"Satu kali",en:"Once"},{v:"2",id:"Dua kali",en:"Twice"},{v:"3-4",id:"Tiga sampai empat kali",en:"Three or four times"},
@@ -301,7 +334,7 @@ const SECTIONS = [
         en:"Receiving a tax message every month for six months would bother me."}}
   ]},
 
-{ id:"S9", t:{id:"Bagian 9. Kemampuan dan Beban Melapor",en:"Part 9. Ability and Burden"},
+{ id:"S9", t:{id:"Bagian 10. Kemampuan dan Beban Melapor",en:"Part 10. Ability and Burden"},
   matrix:{scale:"agree5", rows:[
    {id:"CST1",id_t:"Saya tahu cara menghitung pajak saya sendiri",en_t:"I know how to compute my own tax"},
    {id:"CST2",id_t:"Saya yakin dapat melapor sendiri melalui sistem pajak",en_t:"I am confident I can file on my own through the tax system"},
@@ -310,7 +343,42 @@ const SECTIONS = [
    {id:"CST5",id_t:"Saya tidak yakin apa saja kewajiban saya setelah memiliki NPWP",en_t:"I am unsure what my obligations are once I have a tax number"}
   ]}},
 
-{ id:"S10", t:{id:"Bagian 10. Kepercayaan dan Manfaat Pajak",en:"Part 10. Trust and the Use of Taxes"},
+{ id:"S9B", t:{id:"Bagian 11. Langkah demi Langkah: Hitung, Lapor, Bayar",
+               en:"Part 11. Step by Step: Compute, File, Pay"},
+  s:{id:"Bayangkan tahun ini Anda memiliki kewajiban pajak. Seberapa besar kemungkinan Anda melakukan setiap langkah berikut?",
+     en:"Imagine you have a tax obligation this year. How likely are you to take each step below?"},
+  matrix:{scale:"like5", rows:[
+   {id:"CHN1",id_t:"Menghitung sendiri berapa pajak yang terutang",en_t:"Working out for yourself how much tax is due"},
+   {id:"CHN2",id_t:"Melaporkan SPT bila hasil hitungannya nihil, tidak ada yang perlu disetor",en_t:"Filing the return when the result is nil, with nothing to pay"},
+   {id:"CHN3",id_t:"Melaporkan SPT bila ada pajak yang harus disetor",en_t:"Filing the return when there is tax to pay"},
+   {id:"CHN4",id_t:"Menyetor pajak yang terutang",en_t:"Paying the tax that is due"},
+   {id:"CHN5",id_t:"Menyelesaikan semuanya sebelum batas waktu",en_t:"Finishing all of it before the deadline"}
+  ]}},
+
+{ id:"S9C", t:{id:"Bagian 12. Besarnya Setoran",en:"Part 12. The Size of the Payment"},
+  matrix:{scale:"agree5", rows:[
+   {id:"VAL1",id_t:"Melapor terasa mudah selama tidak ada yang harus disetor",en_t:"Filing feels easy as long as there is nothing to pay"},
+   {id:"VAL2",id_t:"Kalau jumlah setorannya besar, saya cenderung menunda melapor",en_t:"When the amount due is large, I tend to put off filing"},
+   {id:"VAL3",id_t:"Saya lebih memilih terlambat melapor daripada melapor tetapi belum bisa menyetor",en_t:"I would rather file late than file and be unable to pay"},
+   {id:"VAL4",id_t:"Besarnya setoran lebih menentukan keputusan saya daripada batas waktunya",en_t:"The amount due decides what I do more than the deadline does"},
+   {id:"VAL5",id_t:"Saya bersedia menyetor asalkan jumlahnya sesuai dengan kemampuan saya",en_t:"I am willing to pay as long as the amount fits what I can afford"}
+  ]},
+  items:[
+   {id:"VAL_RP",type:"select",q:{id:"Berapa jumlah pajak yang menurut Anda masih wajar untuk Anda setor sendiri tanpa terasa berat?",
+                                 en:"How much tax would still feel reasonable for you to pay yourself, without it feeling heavy?"},
+     opts:[{v:"<100rb",id:"Kurang dari Rp100 ribu",en:"Under Rp100 thousand"},
+           {v:"100-500rb",id:"Rp100 ribu sampai Rp500 ribu",en:"Rp100–500 thousand"},
+           {v:"500rb-1jt",id:"Rp500 ribu sampai Rp1 juta",en:"Rp500 thousand – Rp1 million"},
+           {v:"1-5jt",id:"Rp1 juta sampai Rp5 juta",en:"Rp1–5 million"},
+           {v:">5jt",id:"Lebih dari Rp5 juta",en:"Over Rp5 million"},
+           {v:"tergantung",id:"Tergantung penghasilan saat itu",en:"It depends on my income at the time"},
+           {v:"tidak",id:"Tidak bersedia menyetor",en:"Not willing to pay"}]},
+   {id:"VAL_RP_NOM",type:"number",min:0,max:1000000000,unit:{id:"rupiah",en:"rupiah"},
+     q:{id:"Jika dapat disebutkan angkanya, berapa rupiah? (boleh dikosongkan)",
+        en:"If you can put a figure on it, how many rupiah? (may be left blank)"}}
+  ]},
+
+{ id:"S10", t:{id:"Bagian 13. Kepercayaan dan Manfaat Pajak",en:"Part 13. Trust and the Use of Taxes"},
   matrix:{scale:"agree5", rows:[
    {id:"TRS1",id_t:"Saya percaya DJP menjalankan tugasnya dengan baik",en_t:"I trust that the tax administration does its job well"},
    {id:"TRS2",id_t:"Sistem pajak di Indonesia adil bagi orang seperti saya",en_t:"The tax system in Indonesia is fair to people like me"},
@@ -329,7 +397,7 @@ const SECTIONS = [
            {v:"umkm",id:"Dukungan untuk usaha kecil",en:"Support for small businesses"}]}
   ]},
 
-{ id:"S11", t:{id:"Bagian 11. Niat",en:"Part 11. Intention"},
+{ id:"S11", t:{id:"Bagian 14. Niat",en:"Part 14. Intention"},
   items:[
    {id:"INT1",type:"radio",scale:"intent7",
      q:{id:"Seberapa besar kemungkinan Anda melapor SPT Tahunan berikutnya tepat waktu?",
@@ -340,6 +408,53 @@ const SECTIONS = [
    {id:"INT3",type:"radio",scale:"agree5",
      q:{id:"Saya akan tetap melapor meskipun tidak menerima pesan apa pun dari DJP.",
         en:"I would still file even if I received no message at all."}}
+  ]},
+
+/* Bagian ini hanya muncul bila generasi pada BG0 adalah Gen Z. Saat tersembunyi,
+   isiannya dikosongkan dan tidak dihitung sebagai pertanyaan yang belum dijawab. */
+{ id:"SZ", showIf:{ field:"BG0", eq:"genz" },
+  t:{id:"Bagian 15. Khusus Responden Gen Z",en:"Part 15. For Gen Z Respondents Only"},
+  s:{id:"Bagian ini muncul karena Anda memilih Gen Z pada Bagian 1.",
+     en:"This part appears because you chose Gen Z in Part 1."},
+  matrix:{scale:"agree5", rows:[
+   {id:"GZ1",id_t:"Saya mencari informasi pajak lewat media sosial sebelum membuka sumber resmi",en_t:"I look for tax information on social media before going to an official source"},
+   {id:"GZ2",id_t:"Video pendek lebih membantu saya memahami pajak daripada tulisan panjang",en_t:"A short video helps me understand tax better than a long text"},
+   {id:"GZ3",id_t:"Saya lebih nyaman bertanya lewat chat daripada menelepon atau datang ke kantor",en_t:"I am more comfortable asking by chat than by phone or in person"},
+   {id:"GZ4",id_t:"Saya ingin semua urusan pajak selesai dari HP, tanpa perlu komputer",en_t:"I want to finish every tax task on my phone, without a computer"},
+   {id:"GZ5",id_t:"Saya menunda urusan administrasi sampai mendekati batas waktu",en_t:"I put off paperwork until the deadline is close"},
+   {id:"GZ6",id_t:"Saya khawatir data pribadi saya tidak aman saat mengurus pajak secara daring",en_t:"I worry my personal data is not safe when I handle tax online"},
+   {id:"GZ7",id_t:"Membayar pajak membuat saya merasa sudah dewasa secara finansial",en_t:"Paying tax makes me feel financially grown up"},
+   {id:"GZ8",id_t:"Saya akan lebih patuh kalau teman seumuran saya juga patuh",en_t:"I would comply more if people my age complied too"},
+   {id:"GZ9",id_t:"Bahasa resmi pada surat pajak membuat saya enggan membacanya",en_t:"The formal language of tax letters puts me off reading them"},
+   {id:"GZ10",id_t:"Penghasilan saya tidak tetap, sehingga sulit memperkirakan pajaknya",en_t:"My income is irregular, which makes the tax hard to estimate"}
+  ]},
+  items:[
+   {id:"GZ_SRC",type:"select",q:{id:"Kalau bingung soal pajak, ke mana Anda bertanya lebih dahulu?",
+                                 en:"When you are confused about tax, where do you ask first?"},
+     opts:[{v:"sosmed",id:"Media sosial (TikTok, Instagram, X, YouTube)",en:"Social media"},
+           {v:"mesincari",id:"Mesin pencari",en:"A search engine"},
+           {v:"ai",id:"Asisten AI atau chatbot",en:"An AI assistant or chatbot"},
+           {v:"teman",id:"Teman atau keluarga",en:"Friends or family"},
+           {v:"djp_akun",id:"Akun resmi DJP",en:"The tax administration's official account"},
+           {v:"djp_chat",id:"Live chat atau Kring Pajak",en:"Live chat or the call centre"},
+           {v:"kpp",id:"Datang ke KPP",en:"Going to the tax office"}]},
+   {id:"GZ_INC",type:"multi",q:{id:"Dari mana penghasilan Anda saat ini? (boleh lebih dari satu)",
+                                en:"Where does your income come from at the moment? (more than one allowed)"},
+     opts:[{v:"tetap",id:"Pekerjaan tetap",en:"Permanent job"},
+           {v:"paruh",id:"Kerja paruh waktu",en:"Part-time work"},
+           {v:"freelance",id:"Pekerjaan lepas atau proyek",en:"Freelance or project work"},
+           {v:"konten",id:"Konten, endorse, atau afiliasi",en:"Content, endorsements or affiliate income"},
+           {v:"toko",id:"Toko online atau jualan",en:"Online shop or trading"},
+           {v:"investasi",id:"Investasi atau aset kripto",en:"Investments or crypto"},
+           {v:"ortu",id:"Masih dibiayai orang tua",en:"Still supported by parents"},
+           {v:"belum",id:"Belum berpenghasilan",en:"No income yet"}]},
+   {id:"GZ_FMT",type:"select",q:{id:"Bentuk penyampaian informasi pajak yang paling cocok untuk Anda",
+                                 en:"Which format of tax information suits you best?"},
+     opts:[{v:"video",id:"Video pendek",en:"A short video"},
+           {v:"infografis",id:"Infografis atau gambar",en:"An infographic"},
+           {v:"chat",id:"Percakapan chat langkah demi langkah",en:"A step-by-step chat"},
+           {v:"email",id:"Email berisi penjelasan",en:"An explanatory email"},
+           {v:"artikel",id:"Artikel atau panduan tertulis",en:"A written guide"}]}
   ]}
 ];
 
@@ -410,13 +525,50 @@ function render(){
   document.getElementById("clearBtn").textContent = L(UI.clear);
   document.getElementById("langBtn").textContent = L(UI.lang);
   form.innerHTML = SECTIONS.map(sec=>{
-    let h = `<section class="card"><h2>${L(sec.t)}</h2>`;
+    let h = `<section class="card" id="sec-${sec.id}"><h2>${L(sec.t)}</h2>`;
     if(sec.s) h += `<p class="sub">${L(sec.s)}</p>`;
     if(sec.matrix) h += renderMatrix(sec.id, sec.matrix);
     if(sec.items) h += sec.items.map(renderItem).join("");
     return h + `</section>`;
   }).join("");
+  applyConditionals();
   updateCount();
+}
+
+/* ---------- Bagian bersyarat ----------
+   Bagian dengan properti showIf hanya tampil bila jawaban pada field tertentu
+   cocok. Saat tersembunyi isiannya dikosongkan, supaya tidak ikut terkirim dan
+   tidak dihitung sebagai pertanyaan yang belum dijawab.                        */
+function sectionVisible(sec){
+  if(!sec.showIf) return true;
+  const el = form.querySelector(`[name="${sec.showIf.field}"]`);
+  return !!el && el.value === sec.showIf.eq;
+}
+
+function hiddenIds(){
+  const out = new Set();
+  for(const sec of SECTIONS){
+    if(sectionVisible(sec)) continue;
+    if(sec.matrix) for(const r of sec.matrix.rows) out.add(r.id);
+    if(sec.items) for(const it of sec.items) out.add(it.id);
+  }
+  return out;
+}
+
+function applyConditionals(){
+  for(const sec of SECTIONS){
+    if(!sec.showIf) continue;
+    const node = document.getElementById("sec-" + sec.id);
+    if(!node) continue;
+    const show = sectionVisible(sec);
+    node.hidden = !show;
+    if(!show){
+      node.querySelectorAll("input, select, textarea").forEach(el=>{
+        if(el.type === "radio" || el.type === "checkbox") el.checked = false;
+        else el.value = "";
+      });
+    }
+  }
 }
 
 /* ---------- Daftar kolom ---------- */
@@ -453,8 +605,10 @@ function collect(){
 
 function blankCount(obj){
   let n = 0;
+  const skip = hiddenIds();
   for(const c of columns()){
     if(["resp_id","timestamp","lang","durasi_detik","SES3","SES4"].includes(c)) continue;
+    if(skip.has(c)) continue;                  // bagian bersyarat yang tidak tampil
     if(!obj[c]) n++;
   }
   return n;
@@ -622,6 +776,10 @@ document.getElementById("saveBtn").addEventListener("click", async ()=>{
   form.reset(); startedAt = Date.now(); updateCount(); setStatus();
   window.scrollTo({top:0,behavior:"smooth"});
   alert((ok ? L(UI.saved) : L(UI.savedDl)) + sentMsg);
+});
+
+form.addEventListener("change", (e)=>{
+  if(e.target && e.target.name === "BG0") applyConditionals();
 });
 
 document.getElementById("pickFileBtn").addEventListener("click", pickFile);
