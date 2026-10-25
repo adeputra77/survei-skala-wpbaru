@@ -106,8 +106,8 @@
 const UI = {
   title:{id:"Survei Skala — Komunikasi Pajak untuk Wajib Pajak Baru",
          en:"Scale Survey — Tax Communication for New Taxpayers"},
-  intro:{id:"Survei ini menanyakan jenis pesan, saluran, dan gaya komunikasi mana yang paling memengaruhi kemauan membayar dan melaporkan pajak. Tidak ada jawaban benar atau salah. <b>Jangan menuliskan nama, NPWP, nomor telepon, atau alamat.</b> Isian hanya memakai kode responden.",
-         en:"This survey asks which message types, channels, and styles most affect the willingness to pay and file taxes. There are no right or wrong answers. <b>Do not write names, tax numbers, phone numbers, or addresses.</b> Use the respondent code only."},
+  intro:{id:"Survei ini menanyakan jenis pesan, saluran, dan gaya komunikasi mana yang paling memengaruhi kemauan membayar dan melaporkan pajak. Tidak ada jawaban benar atau salah. Alamat email Anda diminta untuk mengenali jawaban dan keperluan tindak lanjut kegiatan ini, dan disimpan pada lembar kerja tim peneliti. <b>Selain email, jangan menuliskan NPWP, nomor telepon, atau alamat rumah.</b>",
+         en:"This survey asks which message types, channels, and styles most affect the willingness to pay and file taxes. There are no right or wrong answers. Your e-mail address is collected to identify your answers and for follow-up on this event, and is stored in the research team's worksheet. <b>Apart from the e-mail address, do not write tax numbers, phone numbers, or home addresses.</b>"},
   save:{id:"Simpan jawaban", en:"Save response"},
   pick:{id:"Pilih berkas OneDrive", en:"Choose OneDrive file"},
   exp:{id:"Ekspor semua (CSV)", en:"Export all (CSV)"},
@@ -130,7 +130,8 @@ const UI = {
          en:"Response saved. The form is cleared for the next respondent."},
   savedDl:{id:"Jawaban tersimpan di perangkat dan diunduh sebagai CSV.",
            en:"Response saved on this device and downloaded as CSV."},
-  needCode:{id:"Isi kode responden terlebih dahulu.", en:"Please fill in the respondent code first."},
+  needCode:{id:"Isi alamat email terlebih dahulu.", en:"Please fill in your e-mail address first."},
+  badEmail:{id:"Alamat email belum lengkap. Periksa kembali.", en:"That e-mail address looks incomplete. Please check it."},
   confirmBlank:{id:"Masih ada %n pertanyaan yang belum dijawab. Simpan saja?",
                 en:"%n questions are still unanswered. Save anyway?"},
   confirmClear:{id:"Hapus semua jawaban yang tersimpan di perangkat ini? Berkas CSV di OneDrive tidak ikut terhapus.",
@@ -151,16 +152,15 @@ const S = {
 /* ---------- Daftar pertanyaan ---------- */
 const SECTIONS = [
 { id:"S0", t:{id:"Bagian 0. Identitas Sesi",en:"Part 0. Session Details"},
-  s:{id:"Diisi oleh pewawancara. Tanpa nama dan tanpa NPWP.",en:"Filled in by the interviewer. No names, no tax numbers."},
+  s:{id:"Diisi oleh peserta sendiri.",en:"Filled in by the respondent."},
   items:[
-   {id:"SES1",type:"text",req:true,q:{id:"Kode responden (misalnya WP-012 atau MHS-007)",en:"Respondent code (e.g. WP-012 or MHS-007)"}},
+   {id:"SES1",type:"email",req:true,q:{id:"Alamat email Anda",en:"Your e-mail address"}},
    {id:"SES2",type:"select",req:true,q:{id:"Kelompok responden",en:"Respondent group"},
      opts:[{v:"wp_baru",id:"Wajib pajak terdaftar ≤ 3 tahun",en:"Taxpayer registered ≤ 3 years"},
            {v:"wp_lama",id:"Wajib pajak terdaftar > 3 tahun",en:"Taxpayer registered > 3 years"},
            {v:"mahasiswa",id:"Mahasiswa",en:"College student"},
            {v:"lainnya",id:"Lainnya",en:"Other"}]},
-   {id:"SES3",type:"text",q:{id:"Lokasi pengambilan data",en:"Data collection site"}},
-   {id:"SES4",type:"text",q:{id:"Kode pewawancara",en:"Interviewer code"}}
+   {id:"SES3",type:"text",q:{id:"Lokasi pengambilan data",en:"Data collection site"}}
   ]},
 
 { id:"S1", t:{id:"Bagian 1. Latar Belakang",en:"Part 1. Background"},
@@ -486,6 +486,11 @@ function renderItem(it){
       it.opts.map(o=>`<option value="${o.v}">${LANG==="id"?o.id:o.en}</option>`).join("") + `</select>`;
   } else if(it.type==="text"){
     body = `<input type="text" name="${it.id}" maxlength="40">`;
+  } else if(it.type==="email"){
+    // inputmode + autocomplete memunculkan papan ketik email dan saran alamat di HP
+    body = `<input type="email" name="${it.id}" maxlength="80" inputmode="email"
+             autocomplete="email" autocapitalize="off" spellcheck="false"
+             placeholder="nama@contoh.com" style="width:min(320px,100%)">`;
   } else if(it.type==="number"){
     body = `<input type="number" name="${it.id}" min="${it.min??0}" max="${it.max??100}" style="width:110px">` +
            (it.unit?` <span style="color:var(--muted);font-size:13px">${L(it.unit)}</span>`:"");
@@ -607,7 +612,7 @@ function blankCount(obj){
   let n = 0;
   const skip = hiddenIds();
   for(const c of columns()){
-    if(["resp_id","timestamp","lang","durasi_detik","SES3","SES4"].includes(c)) continue;
+    if(["resp_id","timestamp","lang","durasi_detik","SES3"].includes(c)) continue;
     if(skip.has(c)) continue;                  // bagian bersyarat yang tidak tampil
     if(!obj[c]) n++;
   }
@@ -753,6 +758,7 @@ function updateCount(){
 document.getElementById("saveBtn").addEventListener("click", async ()=>{
   const data = collect();
   if(!data.SES1){ alert(L(UI.needCode)); return; }
+  if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(data.SES1.trim())){ alert(L(UI.badEmail)); return; }
   const miss = blankCount(data);
   if(miss > 0 && !confirm(L(UI.confirmBlank).replace("%n", miss))) return;
   const all = getAll(); all.push(data); setAll(all);
